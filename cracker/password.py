@@ -1,10 +1,11 @@
 import hashlib
-from io import BufferedReader
+import multiprocessing
 import struct
+from io import BufferedReader
 
-from crack import crack, Parameter
-from hash_algo import scrypt_hash
+from cracking import HashParameter, run_crack
 from exception import InvalidFileException
+from hashcrack import ScryptCrack
 from wordlist import parse_wordlist
 
 
@@ -31,21 +32,28 @@ def old_password_crack(
 
 def new_password_crack(gesture_file: BufferedReader, wordlist_file: BufferedReader):
     # Android versions < 8.0, >= 6.0
-    N = 16384
-    r = 8
-    p = 1
     gesture_file_contents = gesture_file.read()
     if len(gesture_file_contents) != 58:
         raise InvalidFileException("Gesture pattern file needs to be exactly 58 bytes")
     s = struct.Struct("<17s 8s 32s")
     meta, salt, signature = s.unpack_from(gesture_file_contents)
-    params = (
-        Parameter(
-            salt=salt,
-            target=signature,
-            possible=word,
-            kwargs={"meta": meta},
+
+    queue = multiprocessing.Queue()
+    found = multiprocessing.Event()
+    crackers = run_crack(ScryptCrack, queue, found)
+    for word in parse_wordlist(wordlist_file):
+        if found.is_set():
+            for cracker in crackers:
+                cracker.stop()
+            break
+        queue.put(
+            HashParameter(
+                salt=salt,
+                target=signature,
+                possible=word,
+                kwargs={"meta": meta},
+            )
         )
-        for word in parse_wordlist(wordlist_file)
-    )
-    return crack(scrypt_hash, params)
+    queue.cancel_join_thread()
+    for cracker in crackers:
+        cracker.join()
