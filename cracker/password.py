@@ -6,7 +6,9 @@ from exception import InvalidFileException
 from wordlist import parse_wordlist
 
 
-def old_password_crack(gesture_file: BufferedReader, wordlist_file: BufferedReader, salt: int):
+def old_password_crack(
+    gesture_file: BufferedReader, wordlist_file: BufferedReader, salt: int
+):
     # Android versions <= 5.1
     gesture_file_contents = gesture_file.read()
     if len(gesture_file_contents) != 72:

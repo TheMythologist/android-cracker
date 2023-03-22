@@ -32,7 +32,7 @@ def new_gesture_crack(gesture_file: BufferedReader, gesture_length: int):
         raise InvalidFileException("Gesture pattern file needs to be exactly 58 bytes")
     s = struct.Struct("<17s 8s 32s")
     meta, salt, signature = s.unpack_from(gesture_file_contents)
-    for possible_num in range(10 ** gesture_length):
+    for possible_num in range(10**gesture_length):
         num = str(possible_num).zfill(gesture_length)
         if len(set(num)) != len(num):
             continue
