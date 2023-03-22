@@ -2,6 +2,8 @@ import hashlib
 from io import BufferedReader
 import struct
 
+from crack import crack, Parameter
+from hash_algo import scrypt_hash
 from exception import InvalidFileException
 from wordlist import parse_wordlist
 
@@ -37,8 +39,13 @@ def new_password_crack(gesture_file: BufferedReader, wordlist_file: BufferedRead
         raise InvalidFileException("Gesture pattern file needs to be exactly 58 bytes")
     s = struct.Struct("<17s 8s 32s")
     meta, salt, signature = s.unpack_from(gesture_file_contents)
-    for word in parse_wordlist(wordlist_file):
-        to_hash = meta + word
-        hashed = hashlib.scrypt(to_hash, salt=salt, n=N, r=r, p=p, dklen=32)
-        if hashed == signature:
-            return word.decode()
+    params = (
+        Parameter(
+            salt=salt,
+            target=signature,
+            possible=word,
+            kwargs={"meta": meta},
+        )
+        for word in parse_wordlist(wordlist_file)
+    )
+    return crack(scrypt_hash, params)

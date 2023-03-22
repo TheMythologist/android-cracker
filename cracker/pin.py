@@ -3,7 +3,7 @@ import struct
 from exception import InvalidFileException
 
 from crack import crack, Parameter
-from hash import new_pin_hash, old_pin_hash
+from hash_algo import scrypt_hash, old_pin_hash
 
 
 def old_pin_crack(gesture_file: BufferedReader, length: int, salt: int):
@@ -11,14 +11,14 @@ def old_pin_crack(gesture_file: BufferedReader, length: int, salt: int):
     gesture_file_contents = gesture_file.read()
     if len(gesture_file_contents) != 72:
         raise InvalidFileException("Gesture pattern file needs to be exactly 72 bytes")
-    combined_hash = gesture_file_contents.decode().casefold()
+    combined_hash = gesture_file_contents.decode().casefold().encode()
     sha1, md5 = combined_hash[:40], combined_hash[40:]
     # Get salt
     salt1 = hex(salt & 0xFFFFFFFF)
     salt2 = hex(salt >> 32 & 0xFFFFFFFF)
     parsed_salt = salt2[2:] + salt1[2:]
     params = (
-        Parameter(salt=parsed_salt, target=md5, possible=str(pos).zfill(length))
+        Parameter(salt=parsed_salt.encode(), target=md5, possible=str(pos).zfill(length).encode())
         for pos in range(10**length)
     )
     return crack(old_pin_hash, params)
@@ -36,9 +36,9 @@ def new_pin_crack(gesture_file: BufferedReader, length: int):
         Parameter(
             salt=salt,
             target=signature,
-            possible=str(pos).zfill(length),
+            possible=str(pos).zfill(length).encode(),
             kwargs={"meta": meta},
         )
         for pos in range(10**length)
     )
-    return crack(new_pin_hash, params)
+    return crack(scrypt_hash, params)

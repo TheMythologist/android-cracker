@@ -6,8 +6,8 @@ import multiprocessing
 @dataclass
 class Parameter:
     target: bytes
-    possible: Any
-    salt: Optional[Any] = None
+    possible: bytes
+    salt: Optional[bytes] = None
     kwargs: Optional[dict[str, Any]] = None
 
 

@@ -55,9 +55,9 @@ def parse_args() -> None:
     # print(old_gesture_crack(args.filename, args.length))  # Length is 5
     # print(new_gesture_crack(args.filename, args.length))  # Length is 4
     # print(old_password_crack(args.filename, args.wordlist, args.salt))  # Salt is 6343755648882345554
-    # print(new_password_crack(args.filename, args.wordlist))
+    print(new_password_crack(args.filename, args.wordlist))
     # print(old_pin_crack(args.filename, args.length, args.salt))  # Length is 4, salt is 1059186646558953472
-    print(new_pin_crack(args.filename, args.length))  # Length is 4
+    # print(new_pin_crack(args.filename, args.length))  # Length is 4
 
 
 if __name__ == "__main__":
