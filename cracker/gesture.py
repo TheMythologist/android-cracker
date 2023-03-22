@@ -37,6 +37,6 @@ def new_gesture_crack(gesture_file: BufferedReader, gesture_length: int):
         if len(set(num)) != len(num):
             continue
         to_hash = meta + num.encode()
-        hashed = hashlib.scrypt(to_hash, salt=salt, n=N, r=r, p=p)
-        if hashed[:32] == signature:
+        hashed = hashlib.scrypt(to_hash, salt=salt, n=N, r=r, p=p, dklen=32)
+        if hashed == signature:
             return possible_num

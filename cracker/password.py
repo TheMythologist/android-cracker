@@ -37,6 +37,6 @@ def new_password_crack(gesture_file: BufferedReader, wordlist_file: BufferedRead
     meta, salt, signature = s.unpack_from(gesture_file_contents)
     for word in parse_wordlist(wordlist_file):
         to_hash = meta + word
-        hashed = hashlib.scrypt(to_hash, salt=salt, n=N, r=r, p=p)
-        if hashed[:32] == signature:
-            return word
+        hashed = hashlib.scrypt(to_hash, salt=salt, n=N, r=r, p=p, dklen=32)
+        if hashed == signature:
+            return word.decode()

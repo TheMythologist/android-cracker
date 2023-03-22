@@ -38,6 +38,6 @@ def new_pin_crack(gesture_file: BufferedReader, length: int):
     for possible_num in range(10 ** length):
         num = str(possible_num).zfill(length)
         to_hash = meta + num.encode()
-        hashed = hashlib.scrypt(to_hash, salt=salt, n=N, r=r, p=p)
-        if hashed[:32] == signature:
+        hashed = hashlib.scrypt(to_hash, salt=salt, n=N, r=r, p=p, dklen=32)
+        if hashed == signature:
             return num
