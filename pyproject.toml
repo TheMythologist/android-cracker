@@ -14,6 +14,7 @@ python = "^3.10"
 black = "^23.1.0"
 isort = "^5.12.0"
 flake8 = "^6.0.0"
+pyproject-flake8 = "^6.0.0.post1"
 
 [tool.flake8]
 max-line-length = 88
