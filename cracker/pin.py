@@ -9,9 +9,7 @@ from hashcrack import MD5Crack, ScryptCrack
 
 
 class AbstractPINCracker(AbstractCracker):
-    def __init__(
-        self, file: BufferedReader, length: int, cracker: CrackManager
-    ):
+    def __init__(self, file: BufferedReader, length: int, cracker: CrackManager):
         super().__init__(file, cracker)
         self.length = length
 

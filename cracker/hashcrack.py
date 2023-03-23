@@ -7,7 +7,7 @@ FOUND = multiprocessing.Event()
 
 
 class MD5Crack(CrackManager):
-    def crack(self, params: HashParameter):
+    def crack(self, params: HashParameter) -> str:
         to_hash = params.possible + params.salt
         hashed = hashlib.md5(to_hash).hexdigest().encode()
         if hashed == params.target:
@@ -15,7 +15,7 @@ class MD5Crack(CrackManager):
 
 
 class ScryptCrack(CrackManager):
-    def crack(self, params: HashParameter):
+    def crack(self, params: HashParameter) -> str:
         to_hash = params.kwargs["meta"] + params.possible
         hashed = hashlib.scrypt(to_hash, salt=params.salt, n=16384, r=8, p=1, dklen=32)
         if hashed == params.target:
@@ -23,7 +23,7 @@ class ScryptCrack(CrackManager):
 
 
 class SHA1Crack(CrackManager):
-    def crack(self, params: HashParameter):
+    def crack(self, params: HashParameter) -> str:
         sha1 = hashlib.sha1(params.possible).hexdigest()
         if sha1 == params.target:
             return params.kwargs["original"]

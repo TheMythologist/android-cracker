@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "android-cracker"
+version = "0.1.0"
+description = "Android cracker for PINs, passwords and gestures"
+authors = ["TheMythologist <leekaixuan2001@gmail.com>"]
+license = "LGPL-3.0"
+readme = "README.md"
+packages = [{include = "android_cracker"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+isort = "^5.12.0"
+flake8 = "^6.0.0"
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "E501"]
+
+[tool.isort]
+profile = "black"
+src_paths = ["guardian", "tests"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

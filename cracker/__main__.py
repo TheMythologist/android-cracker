@@ -64,7 +64,12 @@ def parse_args() -> None:
     else:
         raise NotImplementedError(f"Too new android version: {args.version}")
     cracker = crackers[args.type][version]
-    cracker(file=args.filename, length=args.length, salt=args.salt, wordlist_file=args.wordlist).run()
+    cracker(
+        file=args.filename,
+        length=args.length,
+        salt=args.salt,
+        wordlist_file=args.wordlist,
+    ).run()
     # OldGestureCracker(args.filename, args.length).run()  # Length is 5
     # NewGestureCracker(args.filename, args.length).run()  # Length is 4
     # OldPasswordCracker(args.filename, args.wordlist, args.salt).run()  # Salt is 6343755648882345554
