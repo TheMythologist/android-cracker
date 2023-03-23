@@ -1,59 +1,92 @@
-import hashlib
 import multiprocessing
 import struct
-from io import BufferedReader
+from io import BufferedReader, TextIOWrapper
+from typing import Iterable
 
-from cracking import HashParameter, run_crack
+from AbstractCracker import AbstractCracker
+from CrackManager import CrackManager, HashParameter, run_crack
 from exception import InvalidFileException
-from hashcrack import ScryptCrack
-from wordlist import parse_wordlist
+from hashcrack import MD5Crack, ScryptCrack
 
 
-def old_password_crack(
-    gesture_file: BufferedReader, wordlist_file: BufferedReader, salt: int
-):
+class AbstractPasswordCracker(AbstractCracker):
+    def __init__(
+        self,
+        gesture_file: BufferedReader,
+        wordlist_file: BufferedReader,
+        cracker: CrackManager,
+    ):
+        super().__init__(gesture_file, cracker)
+        self.wordlist_file = wordlist_file
+
+    def run(self):
+        queue = multiprocessing.Queue()
+        found = multiprocessing.Event()
+        crackers = run_crack(self.cracker, queue, found)
+
+        for word in self.parse_wordlist(self.wordlist_file):
+            if found.is_set():
+                for cracker in crackers:
+                    cracker.stop()
+                break
+            queue.put(self.generate_hashparameters(word))
+
+        for cracker in crackers:
+            cracker.join()
+        queue.cancel_join_thread()
+
+    @staticmethod
+    def parse_wordlist(wordlist: TextIOWrapper) -> Iterable[bytes]:
+        for word in wordlist:
+            yield word.strip()
+
+
+class OldPasswordCracker(AbstractPasswordCracker):
     # Android versions <= 5.1
-    gesture_file_contents = gesture_file.read()
-    if len(gesture_file_contents) != 72:
-        raise InvalidFileException("Gesture pattern file needs to be exactly 72 bytes")
-    combined_hash = gesture_file_contents.decode().casefold()
-    sha1, md5 = combined_hash[:40], combined_hash[40:]
-    # Get salt
-    salt1 = hex(salt & 0xFFFFFFFF)
-    salt2 = hex(salt >> 32 & 0xFFFFFFFF)
-    parsed_salt = salt2[2:] + salt1[2:]
 
-    for word in parse_wordlist(wordlist_file):
-        salted = word + parsed_salt.encode()
-        hashed = hashlib.md5(salted).hexdigest()
-        if hashed == md5:
-            return word
+    def __init__(
+        self, gesture_file: BufferedReader, wordlist_file: BufferedReader, salt: int
+    ):
+        super().__init__(gesture_file, wordlist_file, MD5Crack)
+        combined_hash = self.gesture_file_contents.lower()
+        sha1, md5 = combined_hash[:40], combined_hash[40:]
+        salt1 = hex(salt & 0xFFFFFFFF)
+        salt2 = hex(salt >> 32 & 0xFFFFFFFF)
+        self.salt = (salt2[2:] + salt1[2:]).encode()
+        self.target = md5
 
-
-def new_password_crack(gesture_file: BufferedReader, wordlist_file: BufferedReader):
-    # Android versions < 8.0, >= 6.0
-    gesture_file_contents = gesture_file.read()
-    if len(gesture_file_contents) != 58:
-        raise InvalidFileException("Gesture pattern file needs to be exactly 58 bytes")
-    s = struct.Struct("<17s 8s 32s")
-    meta, salt, signature = s.unpack_from(gesture_file_contents)
-
-    queue = multiprocessing.Queue()
-    found = multiprocessing.Event()
-    crackers = run_crack(ScryptCrack, queue, found)
-    for word in parse_wordlist(wordlist_file):
-        if found.is_set():
-            for cracker in crackers:
-                cracker.stop()
-            break
-        queue.put(
-            HashParameter(
-                salt=salt,
-                target=signature,
-                possible=word,
-                kwargs={"meta": meta},
+    def validate(self):
+        if len(self.gesture_file_contents) != 72:
+            raise InvalidFileException(
+                "Gesture pattern file needs to be exactly 72 bytes"
             )
+
+    def generate_hashparameters(self, word: bytes) -> HashParameter:
+        return HashParameter(
+            salt=self.salt,
+            target=self.target,
+            possible=word,
         )
-    queue.cancel_join_thread()
-    for cracker in crackers:
-        cracker.join()
+
+
+class NewPasswordCracker(AbstractPasswordCracker):
+    # Android versions < 8.0, >= 6.0
+
+    def __init__(self, gesture_file: BufferedReader, wordlist_file: BufferedReader):
+        super().__init__(gesture_file, wordlist_file, ScryptCrack)
+        s = struct.Struct("<17s 8s 32s")
+        self.meta, self.salt, self.signature = s.unpack_from(self.gesture_file_contents)
+
+    def validate(self):
+        if len(self.gesture_file_contents) != 58:
+            raise InvalidFileException(
+                "Gesture pattern file needs to be exactly 58 bytes"
+            )
+
+    def generate_hashparameters(self, word: bytes) -> HashParameter:
+        return HashParameter(
+            salt=self.salt,
+            target=self.signature,
+            possible=word,
+            kwargs={"meta": self.meta},
+        )

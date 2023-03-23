@@ -1,7 +1,7 @@
 import hashlib
 import multiprocessing
 
-from cracking import CrackManager, HashParameter
+from CrackManager import CrackManager, HashParameter
 
 FOUND = multiprocessing.Event()
 
@@ -20,3 +20,10 @@ class ScryptCrack(CrackManager):
         hashed = hashlib.scrypt(to_hash, salt=params.salt, n=16384, r=8, p=1, dklen=32)
         if hashed == params.target:
             return params.possible.decode()
+
+
+class SHA1Crack(CrackManager):
+    def crack(self, params: HashParameter):
+        sha1 = hashlib.sha1(params.possible).hexdigest()
+        if sha1 == params.target:
+            return params.kwargs["original"]

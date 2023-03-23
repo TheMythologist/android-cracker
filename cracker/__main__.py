@@ -1,9 +1,9 @@
 import argparse
 import timeit
 
-from gesture import new_gesture_crack, old_gesture_crack
-from password import new_password_crack, old_password_crack
-from pin import NewPINCrack, OldPINCrack
+from gesture import NewGestureCracker, OldGestureCracker
+from password import NewPasswordCracker, OldPasswordCracker
+from pin import NewPINCracker, OldPINCracker
 
 
 def parse_args() -> None:
@@ -52,12 +52,12 @@ def parse_args() -> None:
     args = parser.parse_args()
     if args.wordlist and args.type != "password":
         print("Wordlist specified but password type is not 'password', ignoring")
-    # print(old_gesture_crack(args.filename, args.length))  # Length is 5
-    # print(new_gesture_crack(args.filename, args.length))  # Length is 4
-    # print(old_password_crack(args.filename, args.wordlist, args.salt))  # Salt is 6343755648882345554
-    # print(new_password_crack(args.filename, args.wordlist))
-    # OldPINCrack(args.filename, args.length, args.salt).run()  # Length is 4, salt is 1059186646558953472
-    NewPINCrack(args.filename, args.length).run()  # Length is 4
+    OldGestureCracker(args.filename, args.length).run()  # Length is 5
+    # NewGestureCracker(args.filename, args.length).run()  # Length is 4
+    # OldPasswordCracker(args.filename, args.wordlist, args.salt).run()  # Salt is 6343755648882345554
+    # NewPasswordCracker(args.filename, args.wordlist).run()
+    # OldPINCracker(args.filename, args.length, args.salt).run()  # Length is 4, salt is 1059186646558953472
+    # NewPINCracker(args.filename, args.length).run()  # Length is 4
 
 
 if __name__ == "__main__":

@@ -34,8 +34,8 @@ class CrackManager(ABC):
             while not self.found.is_set():
                 params = self.queue.get(timeout=10)
                 if ans := self.crack(params):
+                    print(ans, flush=True)
                     self.found.set()
-                    print(ans)
                     return
         except Empty:
             return

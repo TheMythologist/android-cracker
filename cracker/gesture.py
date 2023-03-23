@@ -1,42 +1,81 @@
 import binascii
 import hashlib
+import multiprocessing
 import struct
 from io import BufferedReader
 from itertools import permutations
 from string import digits
 
+from AbstractCracker import AbstractCracker
+from CrackManager import CrackManager, HashParameter, run_crack
 from exception import InvalidFileException
+from hashcrack import ScryptCrack, SHA1Crack
 
 
-def old_gesture_crack(gesture_file: BufferedReader, gesture_length: int):
+class AbstractGestureCracker(AbstractCracker):
+    def __init__(
+        self, gesture_file: BufferedReader, length: int, cracker: CrackManager
+    ):
+        super().__init__(gesture_file, cracker)
+        self.length = length
+
+    def run(self):
+        queue = multiprocessing.Queue()
+        found = multiprocessing.Event()
+        crackers = run_crack(self.cracker, queue, found)
+
+        for possible_num in permutations(digits, self.length):
+            if found.is_set():
+                for cracker in crackers:
+                    cracker.stop()
+                break
+            queue.put(self.generate_hashparameters("".join(possible_num)))
+
+        for cracker in crackers:
+            cracker.join()
+        queue.cancel_join_thread()
+
+
+class OldGestureCracker(AbstractGestureCracker):
     # Android versions <= 5.1
-    gesture_file_contents = gesture_file.read()
-    if len(gesture_file_contents) != hashlib.sha1().digest_size:
-        raise InvalidFileException("Gesture pattern file needs to be exactly 20 bytes")
-    target = gesture_file_contents.hex()
-    for possible_num in permutations(digits, gesture_length):
-        num = "".join(possible_num)
-        key = binascii.unhexlify("".join(f"{ord(c) - ord('0'):02x}" for c in num))
-        sha1 = hashlib.sha1(key).hexdigest()
-        if sha1 == target:
-            return num
+
+    def __init__(self, gesture_file: BufferedReader, length: int):
+        super().__init__(gesture_file, length, SHA1Crack)
+        self.target = self.gesture_file_contents.hex()
+
+    def validate(self):
+        if len(self.gesture_file_contents) != hashlib.sha1().digest_size:
+            raise InvalidFileException(
+                "Gesture pattern file needs to be exactly 20 bytes"
+            )
+
+    def generate_hashparameters(self, possible_pin: str) -> HashParameter:
+        key = binascii.unhexlify(
+            "".join(f"{ord(c) - ord('0'):02x}" for c in possible_pin)
+        )
+        return HashParameter(
+            target=self.target, possible=key, kwargs={"original": possible_pin}
+        )
 
 
-def new_gesture_crack(gesture_file: BufferedReader, gesture_length: int):
+class NewGestureCracker(AbstractGestureCracker):
     # Android versions < 8.0, >= 6.0
-    N = 16384
-    r = 8
-    p = 1
-    gesture_file_contents = gesture_file.read()
-    if len(gesture_file_contents) != 58:
-        raise InvalidFileException("Gesture pattern file needs to be exactly 58 bytes")
-    s = struct.Struct("<17s 8s 32s")
-    meta, salt, signature = s.unpack_from(gesture_file_contents)
-    for possible_num in range(10**gesture_length):
-        num = str(possible_num).zfill(gesture_length)
-        if len(set(num)) != len(num):
-            continue
-        to_hash = meta + num.encode()
-        hashed = hashlib.scrypt(to_hash, salt=salt, n=N, r=r, p=p, dklen=32)
-        if hashed == signature:
-            return possible_num
+
+    def __init__(self, gesture_file: BufferedReader, length: int):
+        super().__init__(gesture_file, length, ScryptCrack)
+        s = struct.Struct("<17s 8s 32s")
+        self.meta, self.salt, self.signature = s.unpack_from(self.gesture_file_contents)
+
+    def validate(self):
+        if len(self.gesture_file_contents) != 58:
+            raise InvalidFileException(
+                "Gesture pattern file needs to be exactly 58 bytes"
+            )
+
+    def generate_hashparameters(self, possible_pin: str) -> HashParameter:
+        return HashParameter(
+            salt=self.salt,
+            target=self.signature,
+            possible=possible_pin.encode(),
+            kwargs={"meta": self.meta},
+        )
