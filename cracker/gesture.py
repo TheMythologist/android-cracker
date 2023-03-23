@@ -13,10 +13,8 @@ from hashcrack import ScryptCrack, SHA1Crack
 
 
 class AbstractGestureCracker(AbstractCracker):
-    def __init__(
-        self, gesture_file: BufferedReader, length: int, cracker: CrackManager
-    ):
-        super().__init__(gesture_file, cracker)
+    def __init__(self, file: BufferedReader, length: int, cracker: CrackManager):
+        super().__init__(file, cracker)
         self.length = length
 
     def run(self):
@@ -39,12 +37,12 @@ class AbstractGestureCracker(AbstractCracker):
 class OldGestureCracker(AbstractGestureCracker):
     # Android versions <= 5.1
 
-    def __init__(self, gesture_file: BufferedReader, length: int):
-        super().__init__(gesture_file, length, SHA1Crack)
-        self.target = self.gesture_file_contents.hex()
+    def __init__(self, file: BufferedReader, length: int, **kwargs):
+        super().__init__(file, length, SHA1Crack)
+        self.target = self.file_contents.hex()
 
     def validate(self):
-        if len(self.gesture_file_contents) != hashlib.sha1().digest_size:
+        if len(self.file_contents) != hashlib.sha1().digest_size:
             raise InvalidFileException(
                 "Gesture pattern file needs to be exactly 20 bytes"
             )
@@ -61,13 +59,13 @@ class OldGestureCracker(AbstractGestureCracker):
 class NewGestureCracker(AbstractGestureCracker):
     # Android versions < 8.0, >= 6.0
 
-    def __init__(self, gesture_file: BufferedReader, length: int):
-        super().__init__(gesture_file, length, ScryptCrack)
+    def __init__(self, file: BufferedReader, length: int, **kwargs):
+        super().__init__(file, length, ScryptCrack)
         s = struct.Struct("<17s 8s 32s")
-        self.meta, self.salt, self.signature = s.unpack_from(self.gesture_file_contents)
+        self.meta, self.salt, self.signature = s.unpack_from(self.file_contents)
 
     def validate(self):
-        if len(self.gesture_file_contents) != 58:
+        if len(self.file_contents) != 58:
             raise InvalidFileException(
                 "Gesture pattern file needs to be exactly 58 bytes"
             )

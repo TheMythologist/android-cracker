@@ -12,11 +12,11 @@ from hashcrack import MD5Crack, ScryptCrack
 class AbstractPasswordCracker(AbstractCracker):
     def __init__(
         self,
-        gesture_file: BufferedReader,
+        file: BufferedReader,
         wordlist_file: BufferedReader,
         cracker: CrackManager,
     ):
-        super().__init__(gesture_file, cracker)
+        super().__init__(file, cracker)
         self.wordlist_file = wordlist_file
 
     def run(self):
@@ -45,10 +45,10 @@ class OldPasswordCracker(AbstractPasswordCracker):
     # Android versions <= 5.1
 
     def __init__(
-        self, gesture_file: BufferedReader, wordlist_file: BufferedReader, salt: int
+        self, file: BufferedReader, wordlist_file: BufferedReader, salt: int, **kwargs
     ):
-        super().__init__(gesture_file, wordlist_file, MD5Crack)
-        combined_hash = self.gesture_file_contents.lower()
+        super().__init__(file, wordlist_file, MD5Crack)
+        combined_hash = self.file_contents.lower()
         sha1, md5 = combined_hash[:40], combined_hash[40:]
         salt1 = hex(salt & 0xFFFFFFFF)
         salt2 = hex(salt >> 32 & 0xFFFFFFFF)
@@ -56,7 +56,7 @@ class OldPasswordCracker(AbstractPasswordCracker):
         self.target = md5
 
     def validate(self):
-        if len(self.gesture_file_contents) != 72:
+        if len(self.file_contents) != 72:
             raise InvalidFileException(
                 "Gesture pattern file needs to be exactly 72 bytes"
             )
@@ -72,13 +72,13 @@ class OldPasswordCracker(AbstractPasswordCracker):
 class NewPasswordCracker(AbstractPasswordCracker):
     # Android versions < 8.0, >= 6.0
 
-    def __init__(self, gesture_file: BufferedReader, wordlist_file: BufferedReader):
-        super().__init__(gesture_file, wordlist_file, ScryptCrack)
+    def __init__(self, file: BufferedReader, wordlist_file: BufferedReader, **kwargs):
+        super().__init__(file, wordlist_file, ScryptCrack)
         s = struct.Struct("<17s 8s 32s")
-        self.meta, self.salt, self.signature = s.unpack_from(self.gesture_file_contents)
+        self.meta, self.salt, self.signature = s.unpack_from(self.file_contents)
 
     def validate(self):
-        if len(self.gesture_file_contents) != 58:
+        if len(self.file_contents) != 58:
             raise InvalidFileException(
                 "Gesture pattern file needs to be exactly 58 bytes"
             )

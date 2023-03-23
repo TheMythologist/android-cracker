@@ -5,8 +5,8 @@ from CrackManager import CrackManager, HashParameter
 
 
 class AbstractCracker(ABC):
-    def __init__(self, gesture_file: BufferedReader, cracker: CrackManager):
-        self.gesture_file_contents = gesture_file.read()
+    def __init__(self, file: BufferedReader, cracker: CrackManager):
+        self.file_contents = file.read()
         self.validate()
         self.cracker = cracker
 

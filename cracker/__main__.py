@@ -52,7 +52,20 @@ def parse_args() -> None:
     args = parser.parse_args()
     if args.wordlist and args.type != "password":
         print("Wordlist specified but password type is not 'password', ignoring")
-    OldGestureCracker(args.filename, args.length).run()  # Length is 5
+    crackers = {
+        "pattern": {"new": NewGestureCracker, "old": OldGestureCracker},
+        "password": {"new": NewPasswordCracker, "old": OldPasswordCracker},
+        "pin": {"new": NewPINCracker, "old": OldPINCracker},
+    }
+    if 8 >= args.version >= 6:
+        version = "new"
+    elif args.version <= 5.1:
+        version = "old"
+    else:
+        raise NotImplementedError(f"Too new android version: {args.version}")
+    cracker = crackers[args.type][version]
+    cracker(file=args.filename, length=args.length, salt=args.salt, wordlist_file=args.wordlist).run()
+    # OldGestureCracker(args.filename, args.length).run()  # Length is 5
     # NewGestureCracker(args.filename, args.length).run()  # Length is 4
     # OldPasswordCracker(args.filename, args.wordlist, args.salt).run()  # Salt is 6343755648882345554
     # NewPasswordCracker(args.filename, args.wordlist).run()
