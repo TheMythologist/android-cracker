@@ -29,7 +29,7 @@ Run the following command:
 
 For pattern locks, the hash of interest is stored in `/data/system/gesture.key`.
 
-Really, the pattern lock is just the SHA1 hash sequence of digits (0-8) with length from 3 (4 since Android 2.3.3) to 9.
+The pattern lock is just the SHA1 hash sequence of digits (0-8) with length from 3 (4 since Android 2.3.3) to 9.
 
 The gesture board is a 3x3 matrix, and can be repressented as follows (each digit represents a "ball"):
 
@@ -55,13 +55,11 @@ For PINs and password locks, the hash of interest is stored in `/data/system/pas
 
 `/data/system/locksettings.db` is a sqlite file and you can open it with sqlite3 cmdline tool or the [DB browser](https://sqlitebrowser.org/).
 
-## How does the pin/password lock works?
-
 The pin lock contains 4 digits (0-9) and the password is a sequence of digits (0-9) and/or alphabet (a-z, A-Z) with length of 4 or more. Android adds a salt to the end of pin/password, and calculates the SHA1 and MD5 hashes of the salted password.
 
 ## Android 6.0 to 8.0
 
-For gestures, the gesture is represented as an integer of "balls" in order (e.g. 1258). The relevant files are located either in `/data/system/gatekeeper.password.key` for PINS and passwords, or `/data/system/gatekeeper.gesture.key` for gestures.
+For gestures, the gesture is represented as an integer of "balls" in order (e.g. 1258). (Note the change in the digits, as the digits are now from 1-9 instead of the previous 0-8. The hashed sequence is also now in raw integer format instead of the previous hexstring.) The relevant files are located either in `/data/system/gatekeeper.password.key` for PINS and passwords, or `/data/system/gatekeeper.gesture.key` for gestures.
 
 All gatekeeper key files are stored in the following format:
 
