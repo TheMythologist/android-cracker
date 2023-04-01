@@ -9,12 +9,17 @@ packages = [{include = "cracker"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+typing-extensions = "^4.5.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
 isort = "^5.12.0"
 flake8 = "^6.0.0"
 pyproject-flake8 = "^6.0.0.post1"
+mypy = "^1.1.1"
+
+[tool.poetry.scripts]
+android-cracker = "cracker:run"
 
 [tool.flake8]
 max-line-length = 88

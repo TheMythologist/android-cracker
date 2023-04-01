@@ -15,13 +15,35 @@ Files of interest are listed below in their respective modules.
 
 The key length as well as other information (e.g. number of digits and letters respectively) can be found in `/data/system/device_policies.xml`.
 
-## How does this tool work?
+## Installation/running of android-cracker
 
-Run the following command:
+### Installation via pip **(recommended)**
 
   ```bash
-  python cracker -h
+  pip install android-cracker
+  android-cracker -h
   ```
+
+### Installation from source
+
+  ```bash
+  # Clone the repository
+  git clone https://github.com/TheMythologist/android-cracker.git
+
+  # Ensure poetry is installed
+  pip install poetry
+
+  # Running via poetry
+  poetry install
+  poetry run android-cracker -h
+
+  # Running via pip installation
+  cd android-cracker
+  pip install .
+  android-cracker -h
+  ```
+
+## How does this tool work?
 
 ## Android 5.1 and below
 

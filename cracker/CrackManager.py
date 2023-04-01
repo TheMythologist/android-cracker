@@ -1,25 +1,28 @@
 import multiprocessing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from multiprocessing.synchronize import Event
 from queue import Empty
 from typing import Any, Optional
+
+from typing_extensions import Self
 
 
 @dataclass
 class HashParameter:
-    target: bytes
+    target: Any
     possible: bytes
     salt: Optional[bytes] = None
     kwargs: Optional[dict[str, Any]] = None
 
 
 class CrackManager(ABC):
-    def __init__(self, queue: multiprocessing.Queue, found: multiprocessing.Event):
+    def __init__(self, queue: multiprocessing.Queue, found: Event):
         self.queue = queue
         self.found = found
         self.process = multiprocessing.Process(target=self.run, daemon=True)
 
-    def start(self) -> None:
+    def start(self) -> Self:
         self.process.start()
         return self
 
@@ -46,6 +49,6 @@ class CrackManager(ABC):
 
 
 def run_crack(
-    cracker: CrackManager, queue: multiprocessing.Queue, found: multiprocessing.Event
-) -> list[multiprocessing.Process]:
+    cracker: type[CrackManager], queue: multiprocessing.Queue, found: Event
+) -> list[CrackManager]:
     return [cracker(queue, found).start() for _ in range(multiprocessing.cpu_count())]

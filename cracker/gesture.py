@@ -6,14 +6,16 @@ from io import BufferedReader
 from itertools import permutations
 from string import digits
 
-from AbstractCracker import AbstractCracker
-from CrackManager import CrackManager, HashParameter, run_crack
-from exception import InvalidFileException
-from hashcrack import ScryptCrack, SHA1Crack
+from cracker.AbstractCracker import AbstractCracker
+from cracker.CrackManager import CrackManager, HashParameter, run_crack
+from cracker.exception import InvalidFileException
+from cracker.hashcrack import ScryptCrack, SHA1Crack
 
 
 class AbstractGestureCracker(AbstractCracker):
-    def __init__(self, file: BufferedReader, length: int, cracker: CrackManager):
+    def __init__(
+        self, file: BufferedReader, length: int, cracker: type[CrackManager], **kwargs
+    ):
         super().__init__(file, cracker)
         self.length = length
 

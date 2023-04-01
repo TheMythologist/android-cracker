@@ -1,9 +1,10 @@
 import argparse
 import timeit
 
-from gesture import NewGestureCracker, OldGestureCracker
-from password import NewPasswordCracker, OldPasswordCracker
-from pin import NewPINCracker, OldPINCracker
+from cracker.AbstractCracker import AbstractCracker
+from cracker.gesture import NewGestureCracker, OldGestureCracker
+from cracker.password import NewPasswordCracker, OldPasswordCracker
+from cracker.pin import NewPINCracker, OldPINCracker
 
 
 def parse_args() -> argparse.Namespace:
@@ -61,14 +62,14 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def run_crack(args: argparse.Namespace) -> None:
-    crackers = {
+def begin_crack(args: argparse.Namespace) -> None:
+    crackers: dict[str, dict[str, type[AbstractCracker]]] = {
         "pattern": {"new": NewGestureCracker, "old": OldGestureCracker},
         "password": {"new": NewPasswordCracker, "old": OldPasswordCracker},
         "pin": {"new": NewPINCracker, "old": OldPINCracker},
     }
     cracker = crackers[args.type][args.version]
-    cracker(
+    cracker(  # type: ignore[call-arg]
         file=args.filename,
         length=args.length,
         salt=args.salt,
@@ -82,8 +83,12 @@ def run_crack(args: argparse.Namespace) -> None:
     # NewPINCracker(args.filename, args.length).run()  # Length is 4
 
 
-if __name__ == "__main__":
+def run() -> None:
     start = timeit.default_timer()
     args = parse_args()
-    run_crack(args)
+    begin_crack(args)
     print(f"Time taken: {timeit.default_timer() - start:.3f}s")
+
+
+if __name__ == "__main__":
+    run()

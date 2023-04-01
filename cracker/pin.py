@@ -2,14 +2,14 @@ import multiprocessing
 import struct
 from io import BufferedReader
 
-from AbstractCracker import AbstractCracker
-from CrackManager import CrackManager, HashParameter, run_crack
-from exception import InvalidFileException
-from hashcrack import MD5Crack, ScryptCrack
+from cracker.AbstractCracker import AbstractCracker
+from cracker.CrackManager import CrackManager, HashParameter, run_crack
+from cracker.exception import InvalidFileException
+from cracker.hashcrack import MD5Crack, ScryptCrack
 
 
 class AbstractPINCracker(AbstractCracker):
-    def __init__(self, file: BufferedReader, length: int, cracker: CrackManager):
+    def __init__(self, file: BufferedReader, length: int, cracker: type[CrackManager]):
         super().__init__(file, cracker)
         self.length = length
 

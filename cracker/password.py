@@ -1,12 +1,12 @@
 import multiprocessing
 import struct
-from io import BufferedReader, TextIOWrapper
+from io import BufferedReader, BytesIO
 from typing import Iterable
 
-from AbstractCracker import AbstractCracker
-from CrackManager import CrackManager, HashParameter, run_crack
-from exception import InvalidFileException
-from hashcrack import MD5Crack, ScryptCrack
+from cracker.AbstractCracker import AbstractCracker
+from cracker.CrackManager import CrackManager, HashParameter, run_crack
+from cracker.exception import InvalidFileException
+from cracker.hashcrack import MD5Crack, ScryptCrack
 
 
 class AbstractPasswordCracker(AbstractCracker):
@@ -14,7 +14,7 @@ class AbstractPasswordCracker(AbstractCracker):
         self,
         file: BufferedReader,
         wordlist_file: BufferedReader,
-        cracker: CrackManager,
+        cracker: type[CrackManager],
     ):
         super().__init__(file, cracker)
         self.wordlist_file = wordlist_file
@@ -36,7 +36,7 @@ class AbstractPasswordCracker(AbstractCracker):
         queue.cancel_join_thread()
 
     @staticmethod
-    def parse_wordlist(wordlist: TextIOWrapper) -> Iterable[bytes]:
+    def parse_wordlist(wordlist: BytesIO) -> Iterable[bytes]:
         for word in wordlist:
             yield word.strip()
 
