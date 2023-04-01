@@ -2,9 +2,9 @@ import argparse
 import timeit
 
 from cracker.AbstractCracker import AbstractCracker
-from cracker.gesture import NewGestureCracker, OldGestureCracker
-from cracker.password import NewPasswordCracker, OldPasswordCracker
-from cracker.pin import NewPINCracker, OldPINCracker
+from cracker.gesture.crackers import NewGestureCracker, OldGestureCracker
+from cracker.password.crackers import NewPasswordCracker, OldPasswordCracker
+from cracker.pin.crackers import NewPINCracker, OldPINCracker
 
 
 def parse_args() -> argparse.Namespace:
