@@ -86,4 +86,4 @@ if __name__ == "__main__":
     start = timeit.default_timer()
     args = parse_args()
     run_crack(args)
-    print(f"Time taken: {timeit.default_timer() - start}s")
+    print(f"Time taken: {timeit.default_timer() - start:.3f}s")
