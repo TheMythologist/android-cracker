@@ -64,5 +64,5 @@ jobs:
           poetry run pflake8 . --count --exit-zero --max-complexity=10 --statistics
       - name: Type-check with mypy
         run: poetry run mypy .
-      # - name: Test with pytest
-      #   run: poetry run python -m pytest
+      - name: Test with pytest
+        run: poetry run python -m pytest
