@@ -26,4 +26,4 @@ class AbstractPINCracker(AbstractCracker):
         for cracker in crackers:
             cracker.join()
         queue.cancel_join_thread()
-        print(result.get())
+        print(f"Found key: {result.get()}")

@@ -1,11 +1,14 @@
 import argparse
 import timeit
+import logging
 
 from cracker.AbstractCracker import AbstractCracker
 from cracker.gesture.crackers import NewGestureCracker, OldGestureCracker
 from cracker.locksettings import retrieve_salt
 from cracker.password.crackers import NewPasswordCracker, OldPasswordCracker
 from cracker.pin.crackers import NewPINCracker, OldPINCracker
+
+log = logging.getLogger(__name__)
 
 
 def parse_args() -> argparse.Namespace:
@@ -14,7 +17,7 @@ def parse_args() -> argparse.Namespace:
         "filename", type=argparse.FileType("rb"), help="File for cracking"
     )
     parser.add_argument(
-        "-v", "--version", required=True, type=float, help="Android version (e.g. 5.1)"
+        "-av", "--version", required=True, type=float, help="Android version (e.g. 5.1)"
     )
     parser.add_argument(
         "-t",
@@ -39,18 +42,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-l", "--length", type=int, help="Length of the pattern/password/pin"
     )
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
+    salt = parser.add_mutually_exclusive_group()
+    salt.add_argument(
         "-s",
         "--salt",
         type=int,
         help="Salt, only used in cracking passwords and PINs for Android versions <= 5.1",
     )
-    group.add_argument(
+    salt.add_argument(
         "-D",
         "--database",
         type=argparse.FileType(),
         help="File path to locksettings.db",
+    )
+    parser.add_argument(
+        "--log",
+        default="warning",
+        choices=[level.lower() for level in logging._nameToLevel.keys()],
+        type=str.lower,
+        help="Provide logging level. Example --loglevel debug, default=warning",
     )
     args = parser.parse_args()
     if args.wordlist and args.type != "password":
@@ -65,10 +75,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def begin_crack(args: argparse.Namespace) -> None:
+    logging.basicConfig(level=args.log.upper())
     if args.database is not None:
-        print("Retrieveing salt from database...")
         args.salt = retrieve_salt(args.database.name)
-        print(f"Retrieved salt {args.salt}")
+        log.info("Retrieved salt %d", args.salt)
     crackers: dict[str, dict[str, type[AbstractCracker]]] = {
         "pattern": {"new": NewGestureCracker, "old": OldGestureCracker},
         "password": {"new": NewPasswordCracker, "old": OldPasswordCracker},
@@ -84,8 +94,8 @@ def begin_crack(args: argparse.Namespace) -> None:
 
 
 def run() -> None:
-    start = timeit.default_timer()
     args = parse_args()
+    start = timeit.default_timer()
     begin_crack(args)
     print(f"Time taken: {timeit.default_timer() - start:.3f}s")
 

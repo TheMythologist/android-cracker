@@ -32,7 +32,7 @@ class AbstractPasswordCracker(AbstractCracker):
         for cracker in crackers:
             cracker.join()
         queue.cancel_join_thread()
-        print(result.get())
+        print(f"Found key: {result.get()}")
 
     @staticmethod
     def parse_wordlist(wordlist: BytesIO) -> Iterable[bytes]:

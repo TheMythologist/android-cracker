@@ -32,5 +32,5 @@ class AbstractGestureCracker(AbstractCracker):
             cracker.join()
         queue.cancel_join_thread()
         ans = result.get()
-        print(ans)
+        print(f"Found key: {ans}")
         print_graphical_gesture(ans)
