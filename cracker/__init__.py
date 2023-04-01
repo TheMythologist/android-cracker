@@ -3,6 +3,7 @@ import timeit
 
 from cracker.AbstractCracker import AbstractCracker
 from cracker.gesture.crackers import NewGestureCracker, OldGestureCracker
+from cracker.locksettings import retrieve_salt
 from cracker.password.crackers import NewPasswordCracker, OldPasswordCracker
 from cracker.pin.crackers import NewPINCracker, OldPINCracker
 
@@ -38,13 +39,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-l", "--length", type=int, help="Length of the pattern/password/pin"
     )
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
         "-s",
         "--salt",
         type=int,
         help="Salt, only used in cracking passwords and PINs for Android versions <= 5.1",
     )
-    parser.add_argument(
+    group.add_argument(
         "-D",
         "--database",
         type=argparse.FileType(),
@@ -63,6 +65,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def begin_crack(args: argparse.Namespace) -> None:
+    if args.database is not None:
+        print("Retrieveing salt from database...")
+        args.salt = retrieve_salt(args.database.name)
+        print(f"Retrieved salt {args.salt}")
     crackers: dict[str, dict[str, type[AbstractCracker]]] = {
         "pattern": {"new": NewGestureCracker, "old": OldGestureCracker},
         "password": {"new": NewPasswordCracker, "old": OldPasswordCracker},
@@ -75,12 +81,6 @@ def begin_crack(args: argparse.Namespace) -> None:
         salt=args.salt,
         wordlist_file=args.wordlist,
     ).run()
-    # OldGestureCracker(args.filename, args.length).run()  # Length is 5
-    # NewGestureCracker(args.filename, args.length).run()  # Length is 4
-    # OldPasswordCracker(args.filename, args.wordlist, args.salt).run()  # Salt is 6343755648882345554
-    # NewPasswordCracker(args.filename, args.wordlist).run()
-    # OldPINCracker(args.filename, args.length, args.salt).run()  # Length is 4, salt is 1059186646558953472
-    # NewPINCracker(args.filename, args.length).run()  # Length is 4
 
 
 def run() -> None:
