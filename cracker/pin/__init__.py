@@ -13,7 +13,8 @@ class AbstractPINCracker(AbstractCracker):
     def run(self):
         queue = multiprocessing.Queue()
         found = multiprocessing.Event()
-        crackers = run_crack(self.cracker, queue, found)
+        result = multiprocessing.Queue()
+        crackers = run_crack(self.cracker, queue, found, result)
 
         for possible_pin in range(10**self.length):
             if found.is_set():
@@ -25,3 +26,4 @@ class AbstractPINCracker(AbstractCracker):
         for cracker in crackers:
             cracker.join()
         queue.cancel_join_thread()
+        print(result.get())

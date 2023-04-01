@@ -19,7 +19,8 @@ class AbstractPasswordCracker(AbstractCracker):
     def run(self):
         queue = multiprocessing.Queue()
         found = multiprocessing.Event()
-        crackers = run_crack(self.cracker, queue, found)
+        result = multiprocessing.Queue()
+        crackers = run_crack(self.cracker, queue, found, result)
 
         for word in self.parse_wordlist(self.wordlist_file):
             if found.is_set():
@@ -31,6 +32,7 @@ class AbstractPasswordCracker(AbstractCracker):
         for cracker in crackers:
             cracker.join()
         queue.cancel_join_thread()
+        print(result.get())
 
     @staticmethod
     def parse_wordlist(wordlist: BytesIO) -> Iterable[bytes]:

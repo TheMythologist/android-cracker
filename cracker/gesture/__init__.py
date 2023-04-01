@@ -5,6 +5,7 @@ from string import digits
 
 from cracker.AbstractCracker import AbstractCracker
 from cracker.CrackManager import CrackManager, run_crack
+from cracker.gesture.printer import print_graphical_gesture
 
 
 class AbstractGestureCracker(AbstractCracker):
@@ -17,7 +18,8 @@ class AbstractGestureCracker(AbstractCracker):
     def run(self):
         queue = multiprocessing.Queue()
         found = multiprocessing.Event()
-        crackers = run_crack(self.cracker, queue, found)
+        result = multiprocessing.Queue()
+        crackers = run_crack(self.cracker, queue, found, result)
 
         for possible_num in permutations(digits, self.length):
             if found.is_set():
@@ -29,3 +31,6 @@ class AbstractGestureCracker(AbstractCracker):
         for cracker in crackers:
             cracker.join()
         queue.cancel_join_thread()
+        ans = result.get()
+        print(ans)
+        print_graphical_gesture(ans)
