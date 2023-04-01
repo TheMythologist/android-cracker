@@ -5,7 +5,7 @@ description = "Android cracker for PINs, passwords and gestures"
 authors = ["TheMythologist <leekaixuan2001@gmail.com>"]
 license = "LGPL-3.0"
 readme = "README.md"
-packages = [{include = "android_cracker"}]
+packages = [{include = "cracker"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"

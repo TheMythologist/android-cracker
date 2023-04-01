@@ -6,7 +6,7 @@ from password import NewPasswordCracker, OldPasswordCracker
 from pin import NewPINCracker, OldPINCracker
 
 
-def parse_args() -> None:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Crack some Android devices!")
     parser.add_argument(
         "filename", type=argparse.FileType("rb"), help="File for cracking"
@@ -52,18 +52,22 @@ def parse_args() -> None:
     args = parser.parse_args()
     if args.wordlist and args.type != "password":
         print("Wordlist specified but password type is not 'password', ignoring")
+    if 8 >= args.version >= 6:
+        args.version = "new"
+    elif args.version <= 5.1:
+        args.version = "old"
+    else:
+        raise NotImplementedError(f"Too new android version: {args.version}")
+    return args
+
+
+def run_crack(args: argparse.Namespace) -> None:
     crackers = {
         "pattern": {"new": NewGestureCracker, "old": OldGestureCracker},
         "password": {"new": NewPasswordCracker, "old": OldPasswordCracker},
         "pin": {"new": NewPINCracker, "old": OldPINCracker},
     }
-    if 8 >= args.version >= 6:
-        version = "new"
-    elif args.version <= 5.1:
-        version = "old"
-    else:
-        raise NotImplementedError(f"Too new android version: {args.version}")
-    cracker = crackers[args.type][version]
+    cracker = crackers[args.type][args.version]
     cracker(
         file=args.filename,
         length=args.length,
@@ -81,4 +85,5 @@ def parse_args() -> None:
 if __name__ == "__main__":
     start = timeit.default_timer()
     args = parse_args()
-    print(timeit.default_timer() - start)
+    run_crack(args)
+    print(f"Time taken: {timeit.default_timer() - start}s")
