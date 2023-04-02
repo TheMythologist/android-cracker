@@ -14,7 +14,9 @@ class OldGestureCracker(AbstractGestureCracker):
     # Android versions <= 5.1
     first_num = 0
 
-    def __init__(self, file: BufferedReader, device_policy: DevicePolicy, **kwargs):
+    def __init__(
+        self, file: BufferedReader, device_policy: DevicePolicy | None, **kwargs
+    ):
         super().__init__(file, device_policy, SHA1Crack)
         self.target = self.file_contents.hex()
 
@@ -37,7 +39,9 @@ class NewGestureCracker(AbstractGestureCracker):
     # Android versions <= 8.0, >= 6.0
     first_num = 1
 
-    def __init__(self, file: BufferedReader, device_policy: DevicePolicy, **kwargs):
+    def __init__(
+        self, file: BufferedReader, device_policy: DevicePolicy | None, **kwargs
+    ):
         super().__init__(file, device_policy, ScryptCrack)
         s = struct.Struct("<17s 8s 32s")
         self.meta, self.salt, self.signature = s.unpack_from(self.file_contents)

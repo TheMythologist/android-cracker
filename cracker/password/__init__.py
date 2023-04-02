@@ -5,6 +5,7 @@ from typing import Iterable
 
 from cracker.AbstractCracker import AbstractCracker
 from cracker.CrackManager import CrackManager, run_crack
+from cracker.exception import MissingArgumentException
 from cracker.policy import DevicePolicy, PasswordProperty
 
 
@@ -13,9 +14,11 @@ class AbstractPasswordCracker(AbstractCracker):
         self,
         file: BufferedReader,
         device_policy: DevicePolicy | None,
-        wordlist_file: BufferedReader,
+        wordlist_file: BufferedReader | None,
         cracker: type[CrackManager],
     ):
+        if wordlist_file is None:
+            raise MissingArgumentException("Wordlist argument is required")
         super().__init__(file, cracker)
         self.device_policy = device_policy
         self.wordlist_file = wordlist_file

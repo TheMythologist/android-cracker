@@ -2,7 +2,7 @@ import struct
 from io import BufferedReader
 
 from cracker.CrackManager import HashParameter
-from cracker.exception import InvalidFileException
+from cracker.exception import InvalidFileException, MissingArgumentException
 from cracker.hashcrack import MD5Crack, ScryptCrack
 from cracker.password import AbstractPasswordCracker
 from cracker.policy import DevicePolicy
@@ -15,10 +15,12 @@ class OldPasswordCracker(AbstractPasswordCracker):
         self,
         file: BufferedReader,
         device_policy: DevicePolicy | None,
-        salt: int,
-        wordlist_file: BufferedReader,
+        salt: int | None,
+        wordlist_file: BufferedReader | None,
         **kwargs
     ):
+        if salt is None:
+            raise MissingArgumentException("Salt or database argument is required")
         super().__init__(file, device_policy, wordlist_file, MD5Crack)
         combined_hash = self.file_contents.lower()
         sha1, md5 = combined_hash[:40], combined_hash[40:]
@@ -48,7 +50,7 @@ class NewPasswordCracker(AbstractPasswordCracker):
         self,
         file: BufferedReader,
         device_policy: DevicePolicy | None,
-        wordlist_file: BufferedReader,
+        wordlist_file: BufferedReader | None,
         **kwargs
     ):
         super().__init__(file, device_policy, wordlist_file, ScryptCrack)

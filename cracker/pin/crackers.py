@@ -2,7 +2,7 @@ import struct
 from io import BufferedReader
 
 from cracker.CrackManager import HashParameter
-from cracker.exception import InvalidFileException
+from cracker.exception import InvalidFileException, MissingArgumentException
 from cracker.hashcrack import MD5Crack, ScryptCrack
 from cracker.pin import AbstractPINCracker
 from cracker.policy import DevicePolicy
@@ -12,8 +12,14 @@ class OldPINCracker(AbstractPINCracker):
     # Android versions <= 5.1
 
     def __init__(
-        self, file: BufferedReader, device_policy: DevicePolicy, salt: int, **kwargs
+        self,
+        file: BufferedReader,
+        device_policy: DevicePolicy | None,
+        salt: int | None,
+        **kwargs
     ):
+        if salt is None:
+            raise MissingArgumentException("Salt or database argument is required")
         super().__init__(file, device_policy, MD5Crack)
         combined_hash = self.file_contents.lower()
         sha1, md5 = combined_hash[:40], combined_hash[40:]
@@ -39,7 +45,9 @@ class OldPINCracker(AbstractPINCracker):
 class NewPINCracker(AbstractPINCracker):
     # Android versions <= 8.0, >= 6.0
 
-    def __init__(self, file: BufferedReader, device_policy: DevicePolicy, **kwargs):
+    def __init__(
+        self, file: BufferedReader, device_policy: DevicePolicy | None, **kwargs
+    ):
         super().__init__(file, device_policy, ScryptCrack)
         s = struct.Struct("<17s 8s 32s")
         self.meta, self.salt, self.signature = s.unpack_from(self.file_contents)

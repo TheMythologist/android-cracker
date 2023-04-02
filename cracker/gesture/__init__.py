@@ -5,6 +5,7 @@ from string import digits
 
 from cracker.AbstractCracker import AbstractCracker
 from cracker.CrackManager import CrackManager, run_crack
+from cracker.exception import MissingArgumentException
 from cracker.gesture.printer import print_graphical_gesture
 from cracker.policy import DevicePolicy
 
@@ -13,10 +14,12 @@ class AbstractGestureCracker(AbstractCracker):
     def __init__(
         self,
         file: BufferedReader,
-        device_policy: DevicePolicy,
+        device_policy: DevicePolicy | None,
         cracker: type[CrackManager],
         **kwargs,
     ):
+        if device_policy is None:
+            raise MissingArgumentException("Length or policy argument is required")
         super().__init__(file, cracker)
         self.device_policy = device_policy
 
