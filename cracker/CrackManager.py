@@ -49,8 +49,9 @@ class CrackManager(ABC):
         except Empty:
             return
 
+    @staticmethod
     @abstractmethod
-    def crack(self, params: HashParameter):
+    def crack(params: HashParameter):
         ...
 
 

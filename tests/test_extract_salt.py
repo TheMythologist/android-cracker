@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from cracker.parsers.salt import new_extract_info, old_extract_salt
 
 

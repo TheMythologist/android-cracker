@@ -9,4 +9,4 @@ def old_extract_salt(salt: int) -> bytes:
 
 def new_extract_info(contents: bytes) -> tuple[bytes, bytes, bytes]:
     s = struct.Struct("<17s 8s 32s")
-    return s.unpack_from(contents)
+    return s.unpack_from(contents)  # type: ignore[return-value]
