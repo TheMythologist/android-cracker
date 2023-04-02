@@ -76,6 +76,8 @@ def parse_args() -> argparse.Namespace:
 
 def begin_crack(args: argparse.Namespace) -> None:
     logging.basicConfig(level=args.log.upper())
+    if args.salt is not None:
+        args.salt &= 0xFFFFFFFFFFFFFFFF
     if args.database is not None:
         args.salt = retrieve_salt(args.database.name)
         log.info("Retrieved salt %d", args.salt)
