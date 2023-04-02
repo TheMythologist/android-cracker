@@ -88,7 +88,7 @@ def parse_args() -> argparse.Namespace:
 
     if args.policy is not None:
         args.policy = retrieve_policy(args.policy.read())
-    else:
+    elif args.length is not None:
         args.policy = DevicePolicy(args.length)
     return args
 
