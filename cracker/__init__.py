@@ -4,7 +4,8 @@ import timeit
 
 from cracker.AbstractCracker import AbstractCracker
 from cracker.gesture.crackers import NewGestureCracker, OldGestureCracker
-from cracker.locksettings import retrieve_salt
+from cracker.parsers.device_policies import retrieve_length
+from cracker.parsers.locksettings import retrieve_salt
 from cracker.password.crackers import NewPasswordCracker, OldPasswordCracker
 from cracker.pin.crackers import NewPINCracker, OldPINCracker
 
@@ -33,13 +34,14 @@ def parse_args() -> argparse.Namespace:
         help="Wordlist to use for cracking",
         type=argparse.FileType("rb"),
     )
-    parser.add_argument(
+    information = parser.add_mutually_exclusive_group()
+    information.add_argument(
         "-p",
         "--policy",
         type=argparse.FileType(),
         help="File path to device_policies.xml",
     )
-    parser.add_argument(
+    information.add_argument(
         "-l", "--length", type=int, help="Length of the pattern/password/pin"
     )
     salt = parser.add_mutually_exclusive_group()
@@ -63,24 +65,32 @@ def parse_args() -> argparse.Namespace:
         help="Provide logging level. Example --loglevel debug, default=warning",
     )
     args = parser.parse_args()
+    logging.basicConfig(level=args.log.upper())
+
     if args.wordlist and args.type != "password":
-        print("Wordlist specified but password type is not 'password', ignoring")
+        logging.warning(
+            'Wordlist specified but password type is not "password", ignoring'
+        )
+
     if 8 >= args.version >= 6:
         args.version = "new"
     elif args.version <= 5.1:
         args.version = "old"
     else:
         raise NotImplementedError(f"Too new android version: {args.version}")
-    return args
 
-
-def begin_crack(args: argparse.Namespace) -> None:
-    logging.basicConfig(level=args.log.upper())
     if args.salt is not None:
         args.salt &= 0xFFFFFFFFFFFFFFFF
     if args.database is not None:
         args.salt = retrieve_salt(args.database.name)
         log.info("Retrieved salt %d", args.salt)
+
+    if args.policy is not None:
+        args.length = retrieve_length(args.policy.read())
+    return args
+
+
+def begin_crack(args: argparse.Namespace) -> None:
     crackers: dict[str, dict[str, type[AbstractCracker]]] = {
         "pattern": {"new": NewGestureCracker, "old": OldGestureCracker},
         "password": {"new": NewPasswordCracker, "old": OldPasswordCracker},

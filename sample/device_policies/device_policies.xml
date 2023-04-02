@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<policies setup-complete="true">
+<active-password quality="196608" length="4" uppercase="0" lowercase="0" letters="0" numeric="4" symbols="0" nonletter="4" />
+</policies>

@@ -1,9 +1,7 @@
-import re
-
 import pytest
 
 from cracker.exception import InvalidFileException
-from cracker.locksettings import retrieve_salt
+from cracker.parsers.locksettings import retrieve_salt
 
 
 def test_locksetting():
@@ -20,6 +18,6 @@ def test_locksetting():
 def test_bad_locksettings():
     with pytest.raises(
         InvalidFileException,
-        match=re.escape("No salt value in database"),
+        match="No salt value in database",
     ):
         retrieve_salt("sample/locksettings/bad_locksettings.db")
