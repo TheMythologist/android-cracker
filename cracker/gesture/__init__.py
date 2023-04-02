@@ -33,12 +33,11 @@ class AbstractGestureCracker(AbstractCracker):
 
     def run(self) -> None:
         queue: Queue[HashParameter] = multiprocessing.Queue()
-        found = multiprocessing.Event()
         result: Queue[str] = multiprocessing.Queue()
-        crackers = run_crack(self.cracker, queue, found, result)
+        crackers = run_crack(self.cracker, queue, result)
 
         for possible_num in permutations(digits, self.device_policy.length):
-            if found.is_set():
+            if not result.empty():
                 for cracker in crackers:
                     cracker.stop()
                 break

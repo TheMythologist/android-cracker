@@ -21,11 +21,9 @@ class CrackManager(ABC):
     def __init__(
         self,
         queue: Queue[HashParameter],
-        found: Event,
         output_queue: Queue[str],
     ):
         self.queue = queue
-        self.found = found
         self.result = output_queue
         self.process = multiprocessing.Process(target=self.run, daemon=True)
 
@@ -41,11 +39,10 @@ class CrackManager(ABC):
 
     def run(self) -> None:
         try:
-            while not self.found.is_set():
+            while self.result.empty():
                 params = self.queue.get(timeout=10)
                 if ans := self.crack(params):
                     self.result.put(ans)
-                    self.found.set()
                     return
         except Empty:
             return
@@ -59,10 +56,6 @@ class CrackManager(ABC):
 def run_crack(
     cracker: type[CrackManager],
     queue: Queue[HashParameter],
-    found: Event,
     result: Queue[str],
 ) -> list[CrackManager]:
-    return [
-        cracker(queue, found, result).start()
-        for _ in range(multiprocessing.cpu_count())
-    ]
+    return [cracker(queue, result).start() for _ in range(multiprocessing.cpu_count())]

@@ -34,9 +34,8 @@ class AbstractPasswordCracker(AbstractCracker):
 
     def run(self) -> None:
         queue: Queue[HashParameter] = multiprocessing.Queue()
-        found = multiprocessing.Event()
         result: Queue[str] = multiprocessing.Queue()
-        crackers = run_crack(self.cracker, queue, found, result)
+        crackers = run_crack(self.cracker, queue, result)
 
         for word in self.parse_wordlist(self.wordlist_file):
             if self.device_policy is not None:
@@ -47,7 +46,7 @@ class AbstractPasswordCracker(AbstractCracker):
                     and self.get_password_property(word) != self.device_policy.filter
                 ):
                     continue
-            if found.is_set():
+            if not result.empty():
                 for cracker in crackers:
                     cracker.stop()
                 break
