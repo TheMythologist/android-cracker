@@ -20,5 +20,5 @@ class AbstractCracker(ABC):
         ...
 
     @abstractmethod
-    def run(self):
+    def run(self) -> None:
         ...

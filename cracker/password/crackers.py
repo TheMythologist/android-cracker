@@ -1,5 +1,6 @@
 import struct
 from io import BufferedReader
+from typing import Any
 
 from cracker.CrackManager import HashParameter
 from cracker.exception import InvalidFileException, MissingArgumentException
@@ -18,7 +19,7 @@ class OldPasswordCracker(AbstractPasswordCracker):
         device_policy: DevicePolicy | None,
         salt: int | None,
         wordlist_file: BufferedReader | None,
-        **kwargs
+        **kwargs: Any,
     ):
         if salt is None:
             raise MissingArgumentException("Salt or database argument is required")
@@ -28,7 +29,7 @@ class OldPasswordCracker(AbstractPasswordCracker):
         self.salt = old_extract_salt(salt)
         self.target = md5
 
-    def validate(self):
+    def validate(self) -> None:
         if len(self.file_contents) != 72:
             raise InvalidFileException(
                 "Gesture pattern file needs to be exactly 72 bytes"
@@ -50,12 +51,12 @@ class NewPasswordCracker(AbstractPasswordCracker):
         file: BufferedReader,
         device_policy: DevicePolicy | None,
         wordlist_file: BufferedReader | None,
-        **kwargs
+        **kwargs: Any,
     ):
         super().__init__(file, device_policy, wordlist_file, ScryptCrack)
         self.meta, self.salt, self.signature = new_extract_info(self.file_contents)
 
-    def validate(self):
+    def validate(self) -> None:
         if len(self.file_contents) != 58:
             raise InvalidFileException(
                 "Gesture pattern file needs to be exactly 58 bytes"

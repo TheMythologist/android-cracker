@@ -1,10 +1,11 @@
 import multiprocessing
 import string
 from io import BufferedReader, BytesIO
+from multiprocessing.queues import Queue
 from typing import Iterable
 
 from cracker.AbstractCracker import AbstractCracker
-from cracker.CrackManager import CrackManager, run_crack
+from cracker.CrackManager import CrackManager, HashParameter, run_crack
 from cracker.exception import MissingArgumentException
 from cracker.policy import DevicePolicy, PasswordProperty
 
@@ -31,10 +32,10 @@ class AbstractPasswordCracker(AbstractCracker):
         symbols = sum(char in string.punctuation.encode() for char in password)
         return PasswordProperty(upper, lower, numbers, symbols)
 
-    def run(self):
-        queue = multiprocessing.Queue()
+    def run(self) -> None:
+        queue: Queue[HashParameter] = multiprocessing.Queue()
         found = multiprocessing.Event()
-        result = multiprocessing.Queue()
+        result: Queue[str] = multiprocessing.Queue()
         crackers = run_crack(self.cracker, queue, found, result)
 
         for word in self.parse_wordlist(self.wordlist_file):
@@ -58,6 +59,6 @@ class AbstractPasswordCracker(AbstractCracker):
         print(f"Found key: {result.get()}")
 
     @staticmethod
-    def parse_wordlist(wordlist: BytesIO) -> Iterable[bytes]:
+    def parse_wordlist(wordlist: BufferedReader) -> Iterable[bytes]:
         for word in wordlist:
             yield word.strip()

@@ -1,5 +1,6 @@
 import struct
 from io import BufferedReader
+from typing import Any
 
 from cracker.CrackManager import HashParameter
 from cracker.exception import InvalidFileException, MissingArgumentException
@@ -17,7 +18,7 @@ class OldPINCracker(AbstractPINCracker):
         file: BufferedReader,
         device_policy: DevicePolicy | None,
         salt: int | None,
-        **kwargs
+        **kwargs: Any,
     ):
         if salt is None:
             raise MissingArgumentException("Salt or database argument is required")
@@ -27,7 +28,7 @@ class OldPINCracker(AbstractPINCracker):
         self.salt = old_extract_salt(salt)
         self.target = md5
 
-    def validate(self):
+    def validate(self) -> None:
         if len(self.file_contents) != 72:
             raise InvalidFileException(
                 "Gesture pattern file needs to be exactly 72 bytes"
@@ -45,12 +46,12 @@ class NewPINCracker(AbstractPINCracker):
     # Android versions <= 8.0, >= 6.0
 
     def __init__(
-        self, file: BufferedReader, device_policy: DevicePolicy | None, **kwargs
+        self, file: BufferedReader, device_policy: DevicePolicy | None, **kwargs: Any
     ):
         super().__init__(file, device_policy, ScryptCrack)
         self.meta, self.salt, self.signature = new_extract_info(self.file_contents)
 
-    def validate(self):
+    def validate(self) -> None:
         if len(self.file_contents) != 58:
             raise InvalidFileException(
                 "Gesture pattern file needs to be exactly 58 bytes"

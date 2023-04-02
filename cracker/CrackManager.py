@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import multiprocessing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event
 from queue import Empty
 from typing import Any, Optional
-
-from typing_extensions import Self
 
 
 @dataclass
@@ -19,16 +20,16 @@ class HashParameter:
 class CrackManager(ABC):
     def __init__(
         self,
-        queue: multiprocessing.Queue,
+        queue: Queue[HashParameter],
         found: Event,
-        output_queue: multiprocessing.Queue,
+        output_queue: Queue[str],
     ):
         self.queue = queue
         self.found = found
         self.result = output_queue
         self.process = multiprocessing.Process(target=self.run, daemon=True)
 
-    def start(self) -> Self:
+    def start(self) -> CrackManager:
         self.process.start()
         return self
 
@@ -51,15 +52,15 @@ class CrackManager(ABC):
 
     @staticmethod
     @abstractmethod
-    def crack(params: HashParameter):
+    def crack(params: HashParameter) -> str | None:
         ...
 
 
 def run_crack(
     cracker: type[CrackManager],
-    queue: multiprocessing.Queue,
+    queue: Queue[HashParameter],
     found: Event,
-    result: multiprocessing.Queue,
+    result: Queue[str],
 ) -> list[CrackManager]:
     return [
         cracker(queue, found, result).start()

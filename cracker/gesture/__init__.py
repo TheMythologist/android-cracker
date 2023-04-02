@@ -1,10 +1,13 @@
 import multiprocessing
+from abc import abstractmethod
 from io import BufferedReader
 from itertools import permutations
+from multiprocessing.queues import Queue
 from string import digits
+from typing import Any
 
 from cracker.AbstractCracker import AbstractCracker
-from cracker.CrackManager import CrackManager, run_crack
+from cracker.CrackManager import CrackManager, HashParameter, run_crack
 from cracker.exception import MissingArgumentException
 from cracker.gesture.printer import print_graphical_gesture
 from cracker.policy import DevicePolicy
@@ -16,17 +19,22 @@ class AbstractGestureCracker(AbstractCracker):
         file: BufferedReader,
         device_policy: DevicePolicy | None,
         cracker: type[CrackManager],
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         if device_policy is None:
             raise MissingArgumentException("Length or policy argument is required")
         super().__init__(file, cracker)
         self.device_policy = device_policy
 
-    def run(self):
-        queue = multiprocessing.Queue()
+    @property
+    @abstractmethod
+    def first_num(self) -> int:
+        ...
+
+    def run(self) -> None:
+        queue: Queue[HashParameter] = multiprocessing.Queue()
         found = multiprocessing.Event()
-        result = multiprocessing.Queue()
+        result: Queue[str] = multiprocessing.Queue()
         crackers = run_crack(self.cracker, queue, found, result)
 
         for possible_num in permutations(digits, self.device_policy.length):

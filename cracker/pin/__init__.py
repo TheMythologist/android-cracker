@@ -1,8 +1,9 @@
 import multiprocessing
 from io import BufferedReader
+from multiprocessing.queues import Queue
 
 from cracker.AbstractCracker import AbstractCracker
-from cracker.CrackManager import CrackManager, run_crack
+from cracker.CrackManager import CrackManager, HashParameter, run_crack
 from cracker.exception import MissingArgumentException
 from cracker.policy import DevicePolicy
 
@@ -19,10 +20,10 @@ class AbstractPINCracker(AbstractCracker):
         super().__init__(file, cracker)
         self.device_policy = device_policy
 
-    def run(self):
-        queue = multiprocessing.Queue()
+    def run(self) -> None:
+        queue: Queue[HashParameter] = multiprocessing.Queue()
         found = multiprocessing.Event()
-        result = multiprocessing.Queue()
+        result: Queue[str] = multiprocessing.Queue()
         crackers = run_crack(self.cracker, queue, found, result)
 
         for possible_pin in range(10**self.device_policy.length):

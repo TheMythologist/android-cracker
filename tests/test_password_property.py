@@ -2,7 +2,7 @@ from cracker.password import AbstractPasswordCracker
 from cracker.policy import PasswordProperty
 
 
-def test_password_property():
+def test_password_property() -> None:
     AbstractPasswordCracker.get_password_property(b"hello") == PasswordProperty(
         0, 4, 0, 0
     )
