@@ -7,14 +7,15 @@ from cracker.CrackManager import HashParameter
 from cracker.exception import InvalidFileException
 from cracker.gesture import AbstractGestureCracker
 from cracker.hashcrack import ScryptCrack, SHA1Crack
+from cracker.policy import DevicePolicy
 
 
 class OldGestureCracker(AbstractGestureCracker):
     # Android versions <= 5.1
     first_num = 0
 
-    def __init__(self, file: BufferedReader, length: int, **kwargs):
-        super().__init__(file, length, SHA1Crack)
+    def __init__(self, file: BufferedReader, device_policy: DevicePolicy, **kwargs):
+        super().__init__(file, device_policy, SHA1Crack)
         self.target = self.file_contents.hex()
 
     def validate(self):
@@ -36,8 +37,8 @@ class NewGestureCracker(AbstractGestureCracker):
     # Android versions <= 8.0, >= 6.0
     first_num = 1
 
-    def __init__(self, file: BufferedReader, length: int, **kwargs):
-        super().__init__(file, length, ScryptCrack)
+    def __init__(self, file: BufferedReader, device_policy: DevicePolicy, **kwargs):
+        super().__init__(file, device_policy, ScryptCrack)
         s = struct.Struct("<17s 8s 32s")
         self.meta, self.salt, self.signature = s.unpack_from(self.file_contents)
 

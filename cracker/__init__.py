@@ -4,10 +4,11 @@ import timeit
 
 from cracker.AbstractCracker import AbstractCracker
 from cracker.gesture.crackers import NewGestureCracker, OldGestureCracker
-from cracker.parsers.device_policies import retrieve_length
+from cracker.parsers.device_policies import retrieve_policy
 from cracker.parsers.locksettings import retrieve_salt
 from cracker.password.crackers import NewPasswordCracker, OldPasswordCracker
 from cracker.pin.crackers import NewPINCracker, OldPINCracker
+from cracker.policy import DevicePolicy
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +87,9 @@ def parse_args() -> argparse.Namespace:
         log.info("Retrieved salt %d", args.salt)
 
     if args.policy is not None:
-        args.length = retrieve_length(args.policy.read())
+        args.policy = retrieve_policy(args.policy.read())
+    else:
+        args.policy = DevicePolicy(args.length)
     return args
 
 
@@ -99,7 +102,7 @@ def begin_crack(args: argparse.Namespace) -> None:
     cracker = crackers[args.type][args.version]
     cracker(  # type: ignore[call-arg]
         file=args.filename,
-        length=args.length,
+        device_policy=args.policy,
         salt=args.salt,
         wordlist_file=args.wordlist,
     ).run()
