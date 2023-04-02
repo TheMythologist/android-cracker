@@ -32,7 +32,7 @@ class OldGestureCracker(AbstractGestureCracker):
 
 
 class NewGestureCracker(AbstractGestureCracker):
-    # Android versions < 8.0, >= 6.0
+    # Android versions <= 8.0, >= 6.0
 
     def __init__(self, file: BufferedReader, length: int, **kwargs):
         super().__init__(file, length, ScryptCrack)

@@ -97,6 +97,7 @@ def begin_crack(args: argparse.Namespace) -> None:
 
 def run() -> None:
     args = parse_args()
+    print("Starting crack...")
     start = timeit.default_timer()
     begin_crack(args)
     print(f"Time taken: {timeit.default_timer() - start:.3f}s")

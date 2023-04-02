@@ -13,7 +13,7 @@ adb pull /data/system/<file_of_interest>
 
 Files of interest are listed below in their respective modules.
 
-The key length as well as other information (e.g. number of digits and letters respectively) can be found in `/data/system/device_policies.xml`.
+The key length as well as other information (e.g. number of digits and letters respectively) can be found in `/data/system/device_policies.xml` (only applies for Android versions < 8.0).
 
 ## Installation/running of android-cracker
 

@@ -36,7 +36,7 @@ class OldPasswordCracker(AbstractPasswordCracker):
 
 
 class NewPasswordCracker(AbstractPasswordCracker):
-    # Android versions < 8.0, >= 6.0
+    # Android versions <= 8.0, >= 6.0
 
     def __init__(self, file: BufferedReader, wordlist_file: BufferedReader, **kwargs):
         super().__init__(file, wordlist_file, ScryptCrack)
