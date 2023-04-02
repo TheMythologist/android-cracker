@@ -1,6 +1,6 @@
 import multiprocessing
 import string
-from io import BufferedReader, BytesIO
+from io import BufferedReader
 from multiprocessing.queues import Queue
 from typing import Iterable
 
