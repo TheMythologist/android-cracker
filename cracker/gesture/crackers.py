@@ -7,6 +7,7 @@ from cracker.CrackManager import HashParameter
 from cracker.exception import InvalidFileException
 from cracker.gesture import AbstractGestureCracker
 from cracker.hashcrack import ScryptCrack, SHA1Crack
+from cracker.parsers.salt import new_extract_info
 from cracker.policy import DevicePolicy
 
 
@@ -43,8 +44,7 @@ class NewGestureCracker(AbstractGestureCracker):
         self, file: BufferedReader, device_policy: DevicePolicy | None, **kwargs
     ):
         super().__init__(file, device_policy, ScryptCrack)
-        s = struct.Struct("<17s 8s 32s")
-        self.meta, self.salt, self.signature = s.unpack_from(self.file_contents)
+        self.meta, self.salt, self.signature = new_extract_info(self.file_contents)
 
     def validate(self):
         if len(self.file_contents) != 58:
