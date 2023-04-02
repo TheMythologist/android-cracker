@@ -11,6 +11,7 @@ from cracker.hashcrack import ScryptCrack, SHA1Crack
 
 class OldGestureCracker(AbstractGestureCracker):
     # Android versions <= 5.1
+    first_num = 0
 
     def __init__(self, file: BufferedReader, length: int, **kwargs):
         super().__init__(file, length, SHA1Crack)
@@ -33,6 +34,7 @@ class OldGestureCracker(AbstractGestureCracker):
 
 class NewGestureCracker(AbstractGestureCracker):
     # Android versions <= 8.0, >= 6.0
+    first_num = 1
 
     def __init__(self, file: BufferedReader, length: int, **kwargs):
         super().__init__(file, length, ScryptCrack)

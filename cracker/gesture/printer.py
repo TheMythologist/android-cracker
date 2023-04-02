@@ -1,11 +1,11 @@
 # Adapted from https://github.com/sch3m4/androidpatternlock
 
 
-def print_graphical_gesture(pattern: str) -> None:
+def print_graphical_gesture(pattern: str, first_num: int = 0) -> None:
     gesture: list[int | None] = [None, None, None, None, None, None, None, None, None]
 
     for index, num in enumerate(pattern, start=1):
-        gesture[int(num)] = index
+        gesture[int(num) - first_num] = index
     print("Gesture:")
     for number in range(3):
         val: list[str | None] = [None, None, None]
