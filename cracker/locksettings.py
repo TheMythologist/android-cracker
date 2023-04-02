@@ -12,8 +12,8 @@ def retrieve_salt(locksettingdb_path: str) -> int:
             )
             if (result := cur.fetchone()) is None:
                 raise InvalidFileException("No salt value in database")
-        if not result[0].isdigit():
-            raise InvalidFileException(
-                f'Invalid salt value in database (found "{result[0]}")'
-            )
-        return int(result[0])
+    if not result[0].isdigit():
+        raise InvalidFileException(
+            f'Invalid salt value in database (found "{result[0]}")'
+        )
+    return int(result[0]) & 0xFFFFFFFFFFFFFFFF
