@@ -1,6 +1,6 @@
 import argparse
-import timeit
 import logging
+import timeit
 
 from cracker.AbstractCracker import AbstractCracker
 from cracker.gesture.crackers import NewGestureCracker, OldGestureCracker

@@ -29,6 +29,7 @@ extend-ignore = ["E203", "E501"]
 [tool.isort]
 profile = "black"
 src_paths = ["guardian", "tests"]
+known_local_folder = ["cracker"]
 
 [build-system]
 requires = ["poetry-core"]
