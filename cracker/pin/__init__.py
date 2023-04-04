@@ -1,6 +1,7 @@
 import multiprocessing
 from io import BufferedReader
 from multiprocessing.queues import Queue
+from queue import Empty
 
 from cracker.AbstractCracker import AbstractCracker
 from cracker.CrackManager import CrackManager, HashParameter, run_crack
@@ -35,4 +36,7 @@ class AbstractPINCracker(AbstractCracker):
         for cracker in crackers:
             cracker.join()
         queue.cancel_join_thread()
-        print(f"Found key: {result.get()}")
+        try:
+            print(f"Found key: {result.get(block=False)}")
+        except Empty:
+            print("No key found")

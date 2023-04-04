@@ -3,6 +3,7 @@ from abc import abstractmethod
 from io import BufferedReader
 from itertools import permutations
 from multiprocessing.queues import Queue
+from queue import Empty
 from string import digits
 from typing import Any
 
@@ -46,6 +47,9 @@ class AbstractGestureCracker(AbstractCracker):
         for cracker in crackers:
             cracker.join()
         queue.cancel_join_thread()
-        ans = result.get()
-        print(f"Found key: {ans}")
-        print_graphical_gesture(ans, self.first_num)
+        try:
+            ans = result.get(block=False)
+            print(f"Found key: {ans}")
+            print_graphical_gesture(ans, self.first_num)
+        except Empty:
+            print("No key found")

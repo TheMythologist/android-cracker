@@ -4,7 +4,6 @@ import multiprocessing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from multiprocessing.queues import Queue
-from multiprocessing.synchronize import Event
 from queue import Empty
 from typing import Any, Optional
 
@@ -40,7 +39,7 @@ class CrackManager(ABC):
     def run(self) -> None:
         try:
             while self.result.empty():
-                params = self.queue.get(timeout=10)
+                params = self.queue.get(timeout=2)
                 if ans := self.crack(params):
                     self.result.put(ans)
                     return
