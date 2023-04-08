@@ -1,4 +1,3 @@
-import struct
 from io import BufferedReader
 from typing import Any
 

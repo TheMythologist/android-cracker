@@ -2,8 +2,11 @@ import argparse
 import logging
 import timeit
 
-from cracker.AbstractCracker import AbstractCracker
-from cracker.gesture.crackers import NewGestureCracker, OldGestureCracker
+from cracker.gesture.crackers import (
+    CrackerProtocol,
+    NewGestureCracker,
+    OldGestureCracker,
+)
 from cracker.parsers.device_policies import retrieve_policy
 from cracker.parsers.locksettings import retrieve_salt
 from cracker.password.crackers import NewPasswordCracker, OldPasswordCracker
@@ -94,13 +97,13 @@ def parse_args() -> argparse.Namespace:
 
 
 def begin_crack(args: argparse.Namespace) -> None:
-    crackers: dict[str, dict[str, type[AbstractCracker]]] = {
+    crackers: dict[str, dict[str, type[CrackerProtocol]]] = {
         "pattern": {"new": NewGestureCracker, "old": OldGestureCracker},
         "password": {"new": NewPasswordCracker, "old": OldPasswordCracker},
         "pin": {"new": NewPINCracker, "old": OldPINCracker},
     }
     cracker = crackers[args.type][args.version]
-    cracker(  # type: ignore[call-arg]
+    cracker(
         file=args.filename,
         device_policy=args.policy,
         salt=args.salt,
