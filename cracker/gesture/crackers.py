@@ -18,11 +18,9 @@ class CrackerProtocol(Protocol):
         device_policy: DevicePolicy | None,
         salt: int | None,
         wordlist_file: BufferedReader | None,
-    ):
-        ...
+    ): ...
 
-    def run(self) -> None:
-        ...
+    def run(self) -> None: ...
 
 
 class OldGestureCracker(AbstractGestureCracker):

@@ -29,8 +29,7 @@ class AbstractGestureCracker(AbstractCracker):
 
     @property
     @abstractmethod
-    def first_num(self) -> int:
-        ...
+    def first_num(self) -> int: ...
 
     def run(self) -> None:
         queue: Queue[HashParameter] = multiprocessing.Queue()

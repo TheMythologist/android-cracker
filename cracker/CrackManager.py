@@ -48,8 +48,7 @@ class CrackManager(ABC):
 
     @staticmethod
     @abstractmethod
-    def crack(params: HashParameter) -> str | None:
-        ...
+    def crack(params: HashParameter) -> str | None: ...
 
 
 def run_crack(
